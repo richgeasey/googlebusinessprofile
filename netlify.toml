@@ -3,13 +3,9 @@
 
 [functions]
   node_bundler = "esbuild"
-  timeout = 26
 
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "ALLOWALL"
     Content-Security-Policy = "frame-ancestors *"
-
-[context.production]
-  NODE_VERSION = "18"
