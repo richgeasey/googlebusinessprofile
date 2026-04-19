@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GBP Audit Tool — Tall Town Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary: #1E3A6E;
+    --primary-dark: #152d57;
+    --primary-light: #e8eef7;
+    --secondary: #D97706;
+    --bg: #F2F4F7;
+    --surface: #FFFFFF;
+    --border: #D6D3D1;
+    --text: #1C1917;
+    --text-muted: #78716C;
+    --success: #15803D;
+    --success-bg: #dcfce7;
+    --warning: #B45309;
+    --warning-bg: #fef3c7;
+    --error: #B91C1C;
+    --error-bg: #fee2e2;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  header {
+    background: var(--primary);
+    color: white;
+    padding: 28px 24px 24px;
+    text-align: center;
+  }
+
+  header h1 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  header p {
+    font-size: 14px;
+    opacity: 0.75;
+    font-weight: 400;
+  }
+
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    box-shadow: var(--shadow);
+  }
+
+  .input-section {
+    margin-top: 28px;
+  }
+
+  .field {
+    margin-bottom: 18px;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  input[type="text"], input[type="url"] {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--bg);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    outline: none;
+  }
+
+  input[type="text"]:focus, input[type="url"]:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(30,58,110,0.12);
+    background: white;
+  }
+
+  input::placeholder { color: var(--text-muted); }
+
+  .field-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 5px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 14px 24px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 150ms ease, transform 100ms ease;
+    margin-top: 8px;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-primary:active { transform: scale(0.99); }
+  .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
+
+  .status-bar {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 14px 18px;
+    background: var(--primary-light);
+    border: 1px solid #c3d0e8;
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: var(--primary);
+    font-weight: 500;
+  }
+
+  .status-bar.visible { display: flex; }
+
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #c3d0e8;
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-box {
+    display: none;
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--error-bg);
+    border: 1px solid #fca5a5;
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: var(--error);
+  }
+
+  .error-box.visible { display: block; }
+
+  .results-section {
+    margin-top: 28px;
+    display: none;
+  }
+
+  .results-section.visible { display: block; }
+
+  .results-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .biz-name {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--primary);
+  }
+
+  .biz-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .overall-score {
+    text-align: center;
+    background: var(--primary);
+    color: white;
+    padding: 14px 22px;
+    border-radius: var(--radius-lg);
+    min-width: 100px;
+  }
+
+  .score-number {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .score-label {
+    font-size: 11px;
+    opacity: 0.8;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .score-grade {
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 3px;
+    opacity: 0.9;
+  }
+
+  .summary-box {
+    background: var(--primary-light);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 14px 18px;
+    font-size: 14px;
+    color: var(--primary-dark);
+    margin-bottom: 24px;
+    line-height: 1.65;
+  }
+
+  .scores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .score-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .score-pill {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    min-width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .score-pill.grade-a { background: var(--success-bg); color: var(--success); }
+  .score-pill.grade-b { background: #dbeafe; color: #1d4ed8; }
+  .score-pill.grade-c { background: var(--warning-bg); color: var(--warning); }
+  .score-pill.grade-d { background: #ffedd5; color: #c2410c; }
+  .score-pill.grade-f { background: var(--error-bg); color: var(--error); }
+
+  .score-card-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .score-card-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .section-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-light);
+  }
+
+  .category-block {
+    margin-bottom: 22px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .category-block:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .category-name {
+    font-weight: 600;
+    font-size: 15px;
+    flex: 1;
+  }
+
+  .category-score-badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 9999px;
+  }
+
+  .badge-a { background: var(--success-bg); color: var(--success); }
+  .badge-b { background: #dbeafe; color: #1d4ed8; }
+  .badge-c { background: var(--warning-bg); color: var(--warning); }
+  .badge-d { background: #ffedd5; color: #c2410c; }
+  .badge-f { background: var(--error-bg); color: var(--error); }
+
+  .finding-text {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
+
+  .recs-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .recs-list li {
+    display: flex;
+    gap: 10px;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .recs-list li::before {
+    content: "→";
+    color: var(--secondary);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .priority-section {
+    margin-top: 24px;
+  }
+
+  .priority-block {
+    margin-bottom: 16px;
+  }
+
+  .priority-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .dot-red { width: 10px; height: 10px; border-radius: 50%; background: var(--error); flex-shrink: 0; }
+  .dot-yellow { width: 10px; height: 10px; border-radius: 50%; background: var(--secondary); flex-shrink: 0; }
+  .dot-green { width: 10px; height: 10px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+
+  .keyword-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.65;
+    margin-top: 10px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 24px 0;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 32px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <h1>GBP Audit Tool</h1>
+    <p>Google Business Profile Analysis &amp; Recommendations — Tall Town Design</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="input-section">
+    <div class="card">
+      <div class="field">
+        <label for="gbp-url">Google Business Profile URL</label>
+        <input type="url" id="gbp-url" placeholder="https://maps.google.com/..." />
+        <div class="field-hint">Paste the full Google Maps or Google Search link to the business profile.</div>
+      </div>
+      <div class="field">
+        <label for="keywords">Target Keyword(s)</label>
+        <input type="text" id="keywords" placeholder="e.g. roofing contractor Scottsdale AZ" />
+        <div class="field-hint">Primary search terms the business wants to rank for.</div>
+      </div>
+      <div class="field">
+        <label for="biz-name">Business Name <span style="font-weight:400;text-transform:none;font-size:12px;color:var(--text-muted)">(optional — helps if URL doesn't load)</span></label>
+        <input type="text" id="biz-name" placeholder="e.g. Scottsdale Roofing Pros" />
+      </div>
+      <button class="btn-primary" id="run-btn" onclick="runAudit()">Run GBP Audit</button>
+
+      <div class="status-bar" id="status-bar">
+        <div class="spinner"></div>
+        <span id="status-msg">Analyzing profile — this takes 20–30 seconds…</span>
+      </div>
+      <div class="error-box" id="error-box"></div>
+    </div>
+  </div>
+
+  <div class="results-section card" id="results-section">
+
+    <div class="results-header">
+      <div>
+        <div class="biz-name" id="res-biz-name"></div>
+        <div class="biz-meta" id="res-biz-meta"></div>
+      </div>
+      <div class="overall-score" id="overall-score-box">
+        <div class="score-number" id="res-overall-score">—</div>
+        <div class="score-label">Overall Score</div>
+        <div class="score-grade" id="res-overall-grade"></div>
+      </div>
+    </div>
+
+    <div class="summary-box" id="res-summary"></div>
+
+    <div class="section-title">Category Scores</div>
+    <div class="scores-grid" id="scores-grid"></div>
+
+    <hr class="divider">
+
+    <div class="section-title">Findings &amp; Recommendations</div>
+    <div id="categories-detail"></div>
+
+    <hr class="divider">
+
+    <div class="section-title">Priority Action Plan</div>
+    <div class="priority-section" id="priority-section"></div>
+
+    <hr class="divider">
+
+    <div class="section-title">Keyword Gap Analysis</div>
+    <div class="keyword-box" id="keyword-analysis"></div>
+
+  </div>
+
+  <footer>GBP Audit Tool &nbsp;·&nbsp; Tall Town Design &nbsp;·&nbsp; Powered by Claude AI</footer>
+</div>
+
+<script>
+const SYSTEM_PROMPT = `You are a Google Business Profile (GBP) audit expert. Given a GBP URL, business name, and target keywords, perform a comprehensive audit and return ONLY a valid JSON object — no markdown, no preamble, no explanation outside the JSON.
+
+Score each of 7 categories 0–10. Be honest — a 10 means genuinely excellent.
+
+Category scoring rubrics:
+1. Business Info Completeness: 9-10=all fields complete+keyword-rich description; 7-8=most fields, minor gaps; 5-6=several fields missing; 3-4=multiple important gaps; 0-2=largely incomplete
+2. Photos & Visual Presence: 9-10=20+ photos, variety, recent+optimized cover; 7-8=10-20 decent photos; 5-6=5-10 limited/outdated; 3-4=fewer than 5; 0-2=none/placeholder
+3. Reviews & Ratings: 9-10=4.5+ stars, 50+ reviews, owner responds promptly; 7-8=4.0-4.5, 20-50 reviews; 5-6=3.5-4.0 or under 20 reviews; 3-4=below 3.5 or very few; 0-2=1-2 reviews
+4. Posts & Updates: 9-10=post within 7 days, weekly cadence, varied types; 7-8=post within 30 days; 5-6=post within 90 days; 3-4=last post 90+ days ago; 0-2=no posts
+5. Services & Products: 9-10=all services listed with keyword descriptions+pricing; 7-8=most listed, thin descriptions; 5-6=some listed, minimal detail; 3-4=few entries; 0-2=nothing listed
+6. Promotional Offerings: 9-10=active offer post, seasonal promos; 7-8=recent offer within 60 days; 5-6=outdated/vague offer; 3-4=no active offers; 0-2=no promotional content ever
+7. Keyword Relevance & SEO: 9-10=target keywords in description, services, post content, review responses; 7-8=keywords in most sections; 5-6=some keyword usage; 3-4=little keyword strategy; 0-2=none
+
+Grade scale: 9-10=A, 7-8=B, 5-6=C, 3-4=D, 0-2=F
+
+Return this exact JSON structure:
+{
+  "business_name": "string",
+  "audit_date": "string",
+  "keywords": "string",
+  "overall_score": number,
+  "overall_grade": "string",
+  "executive_summary": "string (2-3 sentences)",
+  "categories": [
+    {
+      "name": "string",
+      "score": number,
+      "grade": "string",
+      "finding": "string (2-3 sentences of specific observations)",
+      "recommendations": ["string", "string", "string"]
+    }
+  ],
+  "priority_actions": {
+    "quick_wins": ["string", "string", "string"],
+    "medium_term": ["string", "string", "string"],
+    "ongoing": ["string", "string"]
+  },
+  "keyword_analysis": "string (paragraph analyzing keyword gaps and opportunities)"
+}
+
+Category names must be exactly: "Business Info Completeness", "Photos & Visual Presence", "Reviews & Ratings", "Posts & Updates", "Services & Products", "Promotional Offerings", "Keyword Relevance & SEO"`;
+
+function gradeClass(grade) {
+  const g = (grade || '').toUpperCase();
+  if (g === 'A') return 'grade-a';
+  if (g === 'B') return 'grade-b';
+  if (g === 'C') return 'grade-c';
+  if (g === 'D') return 'grade-d';
+  return 'grade-f';
+}
+
+function badgeClass(grade) {
+  const g = (grade || '').toUpperCase();
+  if (g === 'A') return 'badge-a';
+  if (g === 'B') return 'badge-b';
+  if (g === 'C') return 'badge-c';
+  if (g === 'D') return 'badge-d';
+  return 'badge-f';
+}
+
+function showError(msg) {
+  const box = document.getElementById('error-box');
+  box.textContent = msg;
+  box.classList.add('visible');
+}
+
+function clearError() {
+  const box = document.getElementById('error-box');
+  box.textContent = '';
+  box.classList.remove('visible');
+}
+
+async function runAudit() {
+  const url = document.getElementById('gbp-url').value.trim();
+  const keywords = document.getElementById('keywords').value.trim();
+  const bizName = document.getElementById('biz-name').value.trim();
+
+  clearError();
+  document.getElementById('results-section').classList.remove('visible');
+
+  if (!url) { showError('Please enter a Google Business Profile URL.'); return; }
+  if (!keywords) { showError('Please enter at least one target keyword.'); return; }
+
+  const btn = document.getElementById('run-btn');
+  const statusBar = document.getElementById('status-bar');
+  const statusMsg = document.getElementById('status-msg');
+
+  btn.disabled = true;
+  statusBar.classList.add('visible');
+  statusMsg.textContent = 'Fetching and analyzing the profile…';
+
+  const userPrompt = `Please audit this Google Business Profile.
+
+GBP URL: ${url}
+${bizName ? `Business Name: ${bizName}` : ''}
+Target Keywords: ${keywords}
+
+Search for the business, review all available GBP data, score each category, and return the JSON audit report.`;
+
+  try {
+    const response = await fetch('/.netlify/functions/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.error) throw new Error(data.error.message || 'API error');
+
+    const rawText = data.content
+      .filter(b => b.type === 'text')
+      .map(b => b.text)
+      .join('');
+
+    let parsed;
+    try {
+      const cleaned = rawText.replace(/```json|```/g, '').trim();
+      parsed = JSON.parse(cleaned);
+    } catch {
+      const match = rawText.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('Could not parse audit response. Please try again.');
+      parsed = JSON.parse(match[0]);
+    }
+
+    renderResults(parsed);
+
+  } catch (err) {
+    showError('Error: ' + (err.message || 'Something went wrong. Please try again.'));
+  } finally {
+    btn.disabled = false;
+    statusBar.classList.remove('visible');
+  }
+}
+
+function renderResults(d) {
+  document.getElementById('res-biz-name').textContent = d.business_name || 'Business Profile';
+  document.getElementById('res-biz-meta').textContent = `Keywords: ${d.keywords || '—'} · Audited: ${d.audit_date || new Date().toLocaleDateString()}`;
+  document.getElementById('res-overall-score').textContent = (d.overall_score || 0).toFixed(1) + ' / 10';
+  document.getElementById('res-overall-grade').textContent = 'Grade: ' + (d.overall_grade || '—');
+  document.getElementById('res-summary').textContent = d.executive_summary || '';
+
+  const grid = document.getElementById('scores-grid');
+  grid.innerHTML = '';
+  (d.categories || []).forEach(cat => {
+    const gc = gradeClass(cat.grade);
+    grid.innerHTML += `
+      <div class="score-card">
+        <div class="score-pill ${gc}">${cat.score}/10<br><small>${cat.grade}</small></div>
+        <div>
+          <div class="score-card-label">${cat.name}</div>
+        </div>
+      </div>`;
+  });
+
+  const detail = document.getElementById('categories-detail');
+  detail.innerHTML = '';
+  (d.categories || []).forEach(cat => {
+    const bc = badgeClass(cat.grade);
+    const recs = (cat.recommendations || []).map(r => `<li>${r}</li>`).join('');
+    detail.innerHTML += `
+      <div class="category-block">
+        <div class="category-header">
+          <div class="category-name">${cat.name}</div>
+          <span class="category-score-badge ${bc}">${cat.score}/10 · ${cat.grade}</span>
+        </div>
+        <p class="finding-text">${cat.finding || ''}</p>
+        <ul class="recs-list">${recs}</ul>
+      </div>`;
+  });
+
+  const pa = d.priority_actions || {};
+  const ps = document.getElementById('priority-section');
+  ps.innerHTML = `
+    <div class="priority-block">
+      <div class="priority-label"><span class="dot-red"></span> Quick Wins — Do This Week</div>
+      <ul class="recs-list">${(pa.quick_wins || []).map(i => `<li>${i}</li>`).join('')}</ul>
+    </div>
+    <div class="priority-block">
+      <div class="priority-label"><span class="dot-yellow"></span> Medium-Term — Next 30 Days</div>
+      <ul class="recs-list">${(pa.medium_term || []).map(i => `<li>${i}</li>`).join('')}</ul>
+    </div>
+    <div class="priority-block">
+      <div class="priority-label"><span class="dot-green"></span> Long-Term — Ongoing</div>
+      <ul class="recs-list">${(pa.ongoing || []).map(i => `<li>${i}</li>`).join('')}</ul>
+    </div>`;
+
+  document.getElementById('keyword-analysis').textContent = d.keyword_analysis || '';
+
+  document.getElementById('results-section').classList.add('visible');
+  document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
