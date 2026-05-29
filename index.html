@@ -426,6 +426,44 @@
     font-size: 12px;
     color: var(--text-muted);
   }
+
+  .btn-download {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 11px 24px;
+    background: white;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease;
+    margin-top: 16px;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-download:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  @media print {
+    header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .input-section, .btn-download, footer { display: none !important; }
+    .results-section { display: block !important; border: none; box-shadow: none; }
+    .overall-score { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .summary-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .score-pill { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .category-score-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: white; }
+    .card { box-shadow: none; border: 1px solid #ddd; }
+  }
+
 </style>
 </head>
 <body>
@@ -489,6 +527,11 @@
       </div>
     </div>
 
+    <button class="btn-download" onclick="downloadPDF()">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-8m0 8l-3-3m3 3l3-3M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+      Download / Save as PDF
+    </button>
+
     <div class="summary-box" id="res-summary"></div>
 
     <div class="section-title">Category Scores</div>
@@ -508,6 +551,15 @@
 
     <div class="section-title">Keyword Gap Analysis</div>
     <div class="keyword-box" id="keyword-analysis"></div>
+
+    <hr class="divider">
+
+    <button class="btn-download" onclick="downloadPDF()">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-8m0 8l-3-3m3 3l3-3M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+      Download / Save as PDF
+    </button>
+
+  </div>
 
   </div>
 
@@ -716,6 +768,13 @@ function renderResults(d) {
 
   document.getElementById('results-section').classList.add('visible');
   document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function downloadPDF() {
+  const bizName = document.getElementById('res-biz-name').textContent || 'GBP Audit';
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  document.title = bizName + ' — GBP Audit ' + date;
+  window.print();
 }
 </script>
 </body>
