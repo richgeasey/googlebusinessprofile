@@ -443,8 +443,17 @@
     <div class="card">
       <div class="field">
         <label for="gbp-url">Google Business Profile URL</label>
-        <input type="url" id="gbp-url" placeholder="https://maps.google.com/..." />
-        <div class="field-hint">Paste the full Google Maps or Google Search link to the business profile.</div>
+        <input type="url" id="gbp-url" placeholder="https://www.google.com/maps/place/..." />
+        <div class="field-hint">
+          <strong style="color:#B45309;">⚠️ Do not use short links</strong> — use the full Google Maps URL instead:
+          <ol style="margin:6px 0 0 16px;padding:0;display:flex;flex-direction:column;gap:4px;">
+            <li>Open <strong>Google Maps</strong> in your browser (maps.google.com)</li>
+            <li>Search for the business by name</li>
+            <li>Click on the business to open its profile</li>
+            <li>Copy the URL directly from your <strong>browser address bar</strong></li>
+            <li>It should start with <code style="background:#e8eef7;padding:1px 5px;border-radius:3px;font-size:11px;">https://www.google.com/maps/place/...</code></li>
+          </ol>
+        </div>
       </div>
       <div class="field">
         <label for="keywords">Target Keyword(s)</label>
@@ -452,8 +461,9 @@
         <div class="field-hint">Primary search terms the business wants to rank for.</div>
       </div>
       <div class="field">
-        <label for="biz-name">Business Name <span style="font-weight:400;text-transform:none;font-size:12px;color:var(--text-muted)">(optional — helps if URL doesn't load)</span></label>
+        <label for="biz-name">Business Name</label>
         <input type="text" id="biz-name" placeholder="e.g. Scottsdale Roofing Pros" />
+        <div class="field-hint">Required — ensures the audit targets the correct business.</div>
       </div>
       <button class="btn-primary" id="run-btn" onclick="runAudit()">Run GBP Audit</button>
 
@@ -586,7 +596,12 @@ async function runAudit() {
   document.getElementById('results-section').classList.remove('visible');
 
   if (!url) { showError('Please enter a Google Business Profile URL.'); return; }
+  if (url.includes('share.google') || url.includes('maps.app.goo.gl') || url.includes('goo.gl')) {
+    showError('Short links (share.google, maps.app.goo.gl) cannot be analyzed accurately. Please use the full Google Maps URL from your browser address bar.');
+    return;
+  }
   if (!keywords) { showError('Please enter at least one target keyword.'); return; }
+  if (!bizName) { showError('Please enter the business name — this is required for accurate results.'); return; }
 
   const btn = document.getElementById('run-btn');
   const statusBar = document.getElementById('status-bar');
@@ -599,7 +614,7 @@ async function runAudit() {
   const userPrompt = `Please audit this Google Business Profile.
 
 GBP URL: ${url}
-${bizName ? `Business Name: ${bizName}` : ''}
+Business Name: ${bizName}
 Target Keywords: ${keywords}
 
 Search for the business, review all available GBP data, score each category, and return the JSON audit report.`;
